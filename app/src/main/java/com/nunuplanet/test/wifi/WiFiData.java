@@ -1,4 +1,4 @@
-package com.nunuplanet.test;
+package com.nunuplanet.test.wifi;
 
 
 import java.text.Collator;

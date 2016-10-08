@@ -1,23 +1,17 @@
-package com.nunuplanet.test;
+package com.nunuplanet.test.wifi;
 
-import android.annotation.TargetApi;
 import android.content.Context;
-import android.database.Cursor;
-import android.net.wifi.ScanResult;
-import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.CursorAdapter;
 import android.widget.TextView;
+
+import com.nunuplanet.test.R;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 
 /**
  * Created by hari on 10/6/2016.

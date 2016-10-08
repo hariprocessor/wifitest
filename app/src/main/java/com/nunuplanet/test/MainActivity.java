@@ -19,31 +19,55 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.nunuplanet.test.communication.SendGPS;
+import com.nunuplanet.test.database.GPSTools;
+import com.nunuplanet.test.wifi.WiFiData;
+import com.nunuplanet.test.wifi.WifiListAdapter;
+
+import org.json.JSONException;
 
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    public final static String URL = "http://localhost:8080/gpstest";
+
+
     private ScanResult scanResult;
     private WifiManager wifiManager;
     private List<ScanResult> apList;
     private IntentFilter intentFilter;
     private WifiListAdapter wifiListAdapter = new WifiListAdapter();
     private ListView wifiListView;
+
+    private Button sendButton;
     @TargetApi(Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        int permission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
-        if (permission == PackageManager.PERMISSION_DENIED) {
+        sendButton = (Button) findViewById(R.id.send_button);
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    new SendGPS(getApplicationContext()).sendGPS();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
+            }
+        });
 
-                        /* 사용자가 CALL_PHONE 권한을 한번이라도 거부한 적이 있는 지 조사한다.
-                        * 거부한 이력이 한번이라도 있다면, true를 리턴한다.
-                        */
+        int permission1 = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
+        int permission2 = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        if (permission1 == PackageManager.PERMISSION_DENIED || permission2 == PackageManager.PERMISSION_DENIED) {
+
             if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION)) {
 
                 AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
@@ -69,10 +93,9 @@ public class MainActivity extends AppCompatActivity {
                         .show();
             }
 
-            //최초로 권한을 요청할 때
             else {
-                // CALL_PHONE 권한을 Android OS 에 요청한다.
                 requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1000);
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1000);
             }
 
         }
@@ -80,11 +103,13 @@ public class MainActivity extends AppCompatActivity {
         else {
 
         }
+
+
+
+
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         wifiListView = (ListView) findViewById(R.id.wifi_list_view);
         scan();
-        //WiFiManager wiFiManager = new WiFiManager(getApplicationContext(), wifiListView);
-        //wiFiManager.scan();
 
     }
 
