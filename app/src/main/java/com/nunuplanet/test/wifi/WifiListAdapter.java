@@ -104,9 +104,9 @@ public class WifiListAdapter extends BaseAdapter{
     }
 
     public void clear(){
-        Log.i("hari ", "array list size "+String.valueOf(arrayList.size()));
+        //Log.i("hari ", "array list size "+String.valueOf(arrayList.size()));
         arrayList.clear();
-        Log.i("hari ", "array list size "+String.valueOf(arrayList.size()));
+        //Log.i("hari ", "array list size "+String.valueOf(arrayList.size()));
     }
 
     public void sort(){

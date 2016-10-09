@@ -2,30 +2,28 @@ package com.nunuplanet.test.database;
 
 import com.nunuplanet.test.TimeStamp;
 
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import io.realm.Realm;
-import io.realm.RealmQuery;
 import io.realm.RealmResults;
 
 /**
- * Created by hari on 2016-10-08.
+ * Created by hari on 2016-10-09.
  */
-public class GPSTools {
-
-    public static void saveGPS(final double latitude, final double longitude, final long timestamp){
+public class WiFiTools {
+    public static void saveWiFi(final String BSSID, final String SSID, final int level, final long timestamp){
         Realm realm = Realm.getDefaultInstance();
         realm.executeTransaction(new Realm.Transaction(){
             @Override
             public void execute(Realm realm) {
-                GPS gps = realm.createObject(GPS.class);
-                gps.setLatitude(latitude);
-                gps.setLongitude(longitude);
-                gps.setTimeStamp(timestamp);
-                //gps.setTimeStamp(TimeStamp.getTimeStamp());
+                WiFiList wiFiList = realm.createObject(WiFiList.class);
+                wiFiList.setBSSID(BSSID);
+                wiFiList.setSSID(SSID);
+                wiFiList.setLevel(level);
+                wiFiList.setTimeStamp(timestamp);
+                //wiFiList.setTimeStamp(TimeStamp.getTimeStamp());
             }
         });
     }
@@ -34,9 +32,9 @@ public class GPSTools {
     * execute after midnight
     * save the information of yesterday
     * */
-    public static JSONArray getGPS() throws JSONException {
+    public static JSONArray getWiFi() throws JSONException {
         Realm realm = Realm.getDefaultInstance();
-        RealmResults<GPS> query = realm.where(GPS.class)
+        RealmResults<WiFiList> query = realm.where(WiFiList.class)
                 .lessThan("timeStamp", TimeStamp.getTodayTimeStamp())
                 .greaterThan("timeStamp", TimeStamp.getYesterdayTimeStamp())
                 .findAll();
@@ -50,14 +48,14 @@ public class GPSTools {
         JSONArray jsonArray = new JSONArray();
         for(int i = 0; i < query.size(); i++){
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("latitude", query.get(i).getLatitude());
-            jsonObject.put("longitude", query.get(i).getLongitude());
+            jsonObject.put("BSSID", query.get(i).getBSSID());
+            jsonObject.put("SSID", query.get(i).getSSID());
+            jsonObject.put("level", query.get(i).getLevel());
             jsonObject.put("time_stamp",query.get(i).getTimeStamp());
             jsonArray.put(jsonObject);
         }
 
         return jsonArray;
     }
-
 
 }

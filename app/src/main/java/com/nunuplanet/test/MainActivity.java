@@ -8,6 +8,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.net.Uri;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -24,14 +29,28 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.nunuplanet.test.communication.SendGPS;
+import com.nunuplanet.test.database.GPS;
 import com.nunuplanet.test.database.GPSTools;
+import com.nunuplanet.test.database.Steps;
+import com.nunuplanet.test.database.StepsTools;
+import com.nunuplanet.test.database.WiFiList;
+import com.nunuplanet.test.database.WiFiTools;
 import com.nunuplanet.test.wifi.WiFiData;
 import com.nunuplanet.test.wifi.WifiListAdapter;
 
 import org.json.JSONException;
 
+import java.sql.Time;
 import java.util.List;
+
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import io.realm.RealmResults;
+
 
 public class MainActivity extends AppCompatActivity {
     public final static String URL = "http://localhost:8080/gpstest";
@@ -45,11 +64,39 @@ public class MainActivity extends AppCompatActivity {
     private ListView wifiListView;
 
     private Button sendButton;
+
+    private SensorManager sensorManager;
+    private Sensor sensor;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
+
     @TargetApi(Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+        if(sensor != null){
+            sensorManager.registerListener(new SensorEventListener() {
+                @Override
+                public void onSensorChanged(SensorEvent sensorEvent) {
+                    StepsTools.saveSteps(TimeStamp.getTimeStamp());
+                }
+
+                @Override
+                public void onAccuracyChanged(Sensor sensor, int i) {
+
+                }
+            }, sensor, SensorManager.SENSOR_DELAY_UI);
+        }
+        else{
+            Toast.makeText(this, "Count sensor not available!", Toast.LENGTH_SHORT).show();
+        }
 
         sendButton = (Button) findViewById(R.id.send_button);
         sendButton.setOnClickListener(new View.OnClickListener() {
@@ -64,53 +111,50 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        int permission1 = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
-        int permission2 = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        if (permission1 == PackageManager.PERMISSION_DENIED || permission2 == PackageManager.PERMISSION_DENIED) {
 
-            if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION)) {
+        // get permissions
+        int PERMISSION_ALL = 1;
+        String[] PERMISSIONS = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
 
-                AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
-                dialog.setTitle("권한이 필요합니다.")
-                        .setMessage("이 기능을 사용하기 위해서는 단말기의 \"전화걸기\" 권한이 필요합니다. 계속하시겠습니까?")
-                        .setPositiveButton("네", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                    requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1000);
-                                }
-
-                            }
-                        })
-                        .setNegativeButton("아니오", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Toast.makeText(MainActivity.this, "기능을 취소했습니다.", Toast.LENGTH_SHORT).show();
-                            }
-                        })
-                        .create()
-                        .show();
-            }
-
-            else {
-                requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1000);
-                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1000);
-            }
-
-        }
-                    /* CALL_PHONE의 권한이 있을 때 */
-        else {
-
+        if (!hasPermissions(this, PERMISSIONS)) {
+            ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
         }
 
+        // initialize realm
+        Realm.init(this);
+        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder().build();
+        Realm realm = Realm.getInstance(realmConfiguration);
 
+        // test
+        RealmResults<Steps> query = realm.where(Steps.class).findAll();
+        for(int i = 0; i < query.size(); i++){
+            Log.i("hari", String.valueOf(query.get(i).getStep())+", "+String.valueOf(query.get(i).getTimeStamp()));
+        }
 
+        // activate gps
+        GetGPS getGPS = new GetGPS(this);
+        getGPS.getGPS();
 
+        // activate wifi
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         wifiListView = (ListView) findViewById(R.id.wifi_list_view);
         scan();
 
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+    }
+
+    public static boolean hasPermissions(Context context, String... permissions) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     @Override
@@ -123,8 +167,7 @@ public class MainActivity extends AppCompatActivity {
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(this, "permission granted well :D", Toast.LENGTH_LONG).show();
                 }
-            }
-            else {
+            } else {
                 Toast.makeText(MainActivity.this, "권한 요청을 거부했습니다.", Toast.LENGTH_SHORT).show();
             }
 
@@ -132,34 +175,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void scan(){
+    public void scan() {
         wifiManager.startScan();
         intentFilter = new IntentFilter();
         intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         getApplicationContext().registerReceiver(wifiReceiver, intentFilter);
-        Log.i("hari ", "scan");
+        //Log.i("hari ", "scan");
     }
 
     private BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getAction().equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)){
+            if (intent.getAction().equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
                 searchWifi();
             }
         }
     };
 
     @TargetApi(Build.VERSION_CODES.M)
-    public void searchWifi(){
-        Log.i("hari ", "searchWifi");
+    public void searchWifi() {
         wifiListView.setAdapter(wifiListAdapter);
         apList = wifiManager.getScanResults();
-        if(wifiManager.getScanResults() != null){
-            Log.i("hari ", "searchWifi not null");
-            Log.i("hari ", "searchWificount"+String.valueOf(apList.size()));
+        if (wifiManager.getScanResults() != null) {
             int size = apList.size();
             wifiListAdapter.clear();
-            for(int i = 0; i < size; i++) {
+            for (int i = 0; i < size; i++) {
                 WiFiData wifiData = new WiFiData();
                 wifiData.BSSID = apList.get(i).BSSID;
                 wifiData.SSID = apList.get(i).SSID;
@@ -167,18 +207,52 @@ public class MainActivity extends AppCompatActivity {
                 wifiData.venueName = String.valueOf(apList.get(i).venueName);
                 wifiListAdapter.add(wifiData);
 
-                //scanResult = (ScanResult) apList.get(i);
-                //wifiListAdapter.add
-                //wifiListAdapter.add(scanResult);
-                //Log.i("hari ", String.valueOf(scanResult));
-                //wifiListAdapter.notifyDataSetChanged();
+                WiFiTools.saveWiFi(wifiData.BSSID, wifiData.SSID, wifiData.level, TimeStamp.getTimeStamp());
             }
             wifiListAdapter.sort();
             wifiListAdapter.notifyDataSetChanged();
         }
-        else
-            Log.i("hari ", "searchWifi null");
-
         scan();
+    }
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://com.nunuplanet.test/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://com.nunuplanet.test/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
     }
 }

@@ -8,6 +8,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.nunuplanet.test.database.GPSTools;
@@ -37,7 +38,8 @@ public class GetGPS {
             public void onLocationChanged(Location location) {
                 double latitude = location.getLatitude();
                 double longitude = location.getLongitude();
-                GPSTools.saveGPS(latitude, longitude);
+                //Log.i("hari", String.valueOf(latitude)+", "+String.valueOf(longitude));
+                GPSTools.saveGPS(latitude, longitude, TimeStamp.getTimeStamp());
             }
 
             @Override
