@@ -1,6 +1,7 @@
 package com.nunuplanet.test.database;
 
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by hari on 2016-10-08.
@@ -8,6 +9,8 @@ import io.realm.RealmObject;
 public class GPS extends RealmObject{
     private double latitude;
     private double longitude;
+
+    @PrimaryKey
     private long timeStamp;
 
     public double getLatitude(){

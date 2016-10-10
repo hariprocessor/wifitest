@@ -18,11 +18,13 @@ public class WiFiTools {
         realm.executeTransaction(new Realm.Transaction(){
             @Override
             public void execute(Realm realm) {
-                WiFiList wiFiList = realm.createObject(WiFiList.class);
+                //WiFiList wiFiList = realm.createObject(WiFiList.class, timestamp);
+                WiFiList wiFiList = new WiFiList();
                 wiFiList.setBSSID(BSSID);
                 wiFiList.setSSID(SSID);
                 wiFiList.setLevel(level);
-                wiFiList.setTimeStamp(timestamp);
+                wiFiList.setTimeStamp(TimeStamp.getTimeStamp());
+                realm.copyToRealmOrUpdate(wiFiList);
                 //wiFiList.setTimeStamp(TimeStamp.getTimeStamp());
             }
         });

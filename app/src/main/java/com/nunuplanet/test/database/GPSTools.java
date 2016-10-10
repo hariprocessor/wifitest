@@ -21,10 +21,12 @@ public class GPSTools {
         realm.executeTransaction(new Realm.Transaction(){
             @Override
             public void execute(Realm realm) {
-                GPS gps = realm.createObject(GPS.class);
+                //GPS gps = realm.createObject(GPS.class, timestamp);
+                GPS gps = new GPS();
+                gps.setTimeStamp(TimeStamp.getTimeStamp());
                 gps.setLatitude(latitude);
                 gps.setLongitude(longitude);
-                gps.setTimeStamp(timestamp);
+                realm.copyToRealmOrUpdate(gps);
                 //gps.setTimeStamp(TimeStamp.getTimeStamp());
             }
         });

@@ -3,6 +3,7 @@ package com.nunuplanet.test.database;
 import java.util.ArrayList;
 
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by hari on 2016-10-09.
@@ -11,6 +12,8 @@ public class WiFiList extends RealmObject{
     private String BSSID;
     private String SSID;
     private int level;
+
+    @PrimaryKey
     private long timeStamp;
 
     public void setBSSID(String BSSID){

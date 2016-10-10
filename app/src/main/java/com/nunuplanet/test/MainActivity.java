@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
     private ListView wifiListView;
 
     private Button sendButton;
+    private Button logButton;
 
     private SensorManager sensorManager;
     private Sensor sensor;
@@ -78,6 +79,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+
+
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
@@ -123,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
         // initialize realm
         Realm.init(this);
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder().build();
-        Realm realm = Realm.getInstance(realmConfiguration);
+        final Realm realm = Realm.getInstance(realmConfiguration);
 
         // test
         RealmResults<Steps> query = realm.where(Steps.class).findAll();
@@ -138,12 +143,29 @@ public class MainActivity extends AppCompatActivity {
         // activate wifi
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         wifiListView = (ListView) findViewById(R.id.wifi_list_view);
-        scan();
+        //scan();
+        GetWiFi getWiFi = new GetWiFi(this, wifiListView);
+        getWiFi.scan();
 
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
+
+        logButton = (Button) findViewById(R.id.log_button);
+        logButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                RealmResults<Steps> query = realm.where(Steps.class).findAll();
+                for(int i = 0; i < query.size(); i++){
+
+                }
+            }
+        });
+
+
+
     }
 
     public static boolean hasPermissions(Context context, String... permissions) {
@@ -174,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
+/*
     public void scan() {
         wifiManager.startScan();
         intentFilter = new IntentFilter();
@@ -215,7 +237,7 @@ public class MainActivity extends AppCompatActivity {
         scan();
     }
 
-
+*/
     @Override
     public void onStart() {
         super.onStart();

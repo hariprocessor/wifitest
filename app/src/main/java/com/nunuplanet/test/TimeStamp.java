@@ -9,7 +9,7 @@ import java.util.Calendar;
  */
 public class TimeStamp {
     public static long getTimeStamp(){
-        return System.currentTimeMillis();
+        return System.currentTimeMillis()/1000;
     }
 
     public static long getTodayTimeStamp(){
@@ -18,6 +18,7 @@ public class TimeStamp {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
+        Log.i("hari", String.valueOf(calendar.getTimeInMillis()/1000000));
         return calendar.getTimeInMillis()/1000;
     }
 

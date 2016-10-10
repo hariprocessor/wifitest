@@ -1,5 +1,7 @@
 package com.nunuplanet.test.database;
 
+import android.util.Log;
+
 import com.nunuplanet.test.TimeStamp;
 
 import org.json.JSONArray;
@@ -17,6 +19,20 @@ public class StepsTools {
         Realm realm = Realm.getDefaultInstance();
         final long _timestamp = timestamp - timestamp%5;
         final RealmResults<Steps> query = realm.where(Steps.class).equalTo("timeStamp", _timestamp).findAll();
+        //Log.i("hari", String.valueOf(_timestamp) + ", " + String.valueOf(query.size()));
+
+        /*
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                Steps steps = new Steps();
+                steps.setTimeStamp(_timestamp);
+                steps.setStep(1);
+                realm.copyToRealmOrUpdate(steps);
+            }
+        });
+*/
+
         if(query.size() != 0){
             realm.executeTransaction(new Realm.Transaction() {
                 @Override
@@ -30,10 +46,11 @@ public class StepsTools {
             realm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
-                    Steps steps = realm.createObject(Steps.class);
+                    //Steps steps = realm.createObject(Steps.class);
+                    Steps steps = new Steps();
                     steps.setTimeStamp(_timestamp);
                     steps.setStep(1);
-
+                    realm.copyToRealmOrUpdate(steps);
                 }
             });
         }
