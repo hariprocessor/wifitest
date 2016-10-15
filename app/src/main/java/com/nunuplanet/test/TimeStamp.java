@@ -9,7 +9,7 @@ import java.util.Calendar;
  */
 public class TimeStamp {
     public static long getTimeStamp(){
-        return System.currentTimeMillis();
+        return System.currentTimeMillis()/1000;
     }
 
     public static long getTodayTimeStamp(){

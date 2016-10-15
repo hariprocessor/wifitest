@@ -4,13 +4,10 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.net.wifi.ScanResult;
@@ -18,9 +15,7 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,18 +28,13 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.nunuplanet.test.communication.SendGPS;
-import com.nunuplanet.test.database.GPS;
-import com.nunuplanet.test.database.GPSTools;
 import com.nunuplanet.test.database.Steps;
-import com.nunuplanet.test.database.StepsTools;
-import com.nunuplanet.test.database.WiFiList;
 import com.nunuplanet.test.database.WiFiTools;
 import com.nunuplanet.test.wifi.WiFiData;
 import com.nunuplanet.test.wifi.WifiListAdapter;
 
 import org.json.JSONException;
 
-import java.sql.Time;
 import java.util.List;
 
 import io.realm.Realm;
@@ -79,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        /*
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
         if(sensor != null){
@@ -97,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
         else{
             Toast.makeText(this, "Count sensor not available!", Toast.LENGTH_SHORT).show();
         }
-
+*/
         sendButton = (Button) findViewById(R.id.send_button);
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
         for(int i = 0; i < query.size(); i++){
             Log.i("hari", String.valueOf(query.get(i).getStep())+", "+String.valueOf(query.get(i).getTimeStamp()));
         }
-
+/*
         // activate gps
         GetGPS getGPS = new GetGPS(this);
         getGPS.getGPS();
@@ -140,10 +131,14 @@ public class MainActivity extends AppCompatActivity {
         wifiListView = (ListView) findViewById(R.id.wifi_list_view);
         scan();
 
-
+*/
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
+
+        Intent intent = new Intent(MainActivity.this, MyService.class);
+        startService(intent);
     }
 
     public static boolean hasPermissions(Context context, String... permissions) {
@@ -194,23 +189,29 @@ public class MainActivity extends AppCompatActivity {
 
     @TargetApi(Build.VERSION_CODES.M)
     public void searchWifi() {
+        /*
         wifiListView.setAdapter(wifiListAdapter);
+        */
         apList = wifiManager.getScanResults();
+
         if (wifiManager.getScanResults() != null) {
+
             int size = apList.size();
-            wifiListAdapter.clear();
+
+            //wifiListAdapter.clear();
             for (int i = 0; i < size; i++) {
+
                 WiFiData wifiData = new WiFiData();
                 wifiData.BSSID = apList.get(i).BSSID;
                 wifiData.SSID = apList.get(i).SSID;
                 wifiData.level = apList.get(i).level;
                 wifiData.venueName = String.valueOf(apList.get(i).venueName);
-                wifiListAdapter.add(wifiData);
+                //wifiListAdapter.add(wifiData);
 
                 WiFiTools.saveWiFi(wifiData.BSSID, wifiData.SSID, wifiData.level, TimeStamp.getTimeStamp());
             }
-            wifiListAdapter.sort();
-            wifiListAdapter.notifyDataSetChanged();
+            //wifiListAdapter.sort();
+            //wifiListAdapter.notifyDataSetChanged();
         }
         scan();
     }
