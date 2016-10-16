@@ -1,5 +1,7 @@
 package com.nunuplanet.test.database;
 
+import android.util.Log;
+
 import com.nunuplanet.test.TimeStamp;
 
 import org.json.JSONArray;
@@ -35,23 +37,26 @@ public class WiFiTools {
     public static JSONArray getWiFi() throws JSONException {
         Realm realm = Realm.getDefaultInstance();
         RealmResults<WiFiList> query = realm.where(WiFiList.class)
-                .lessThan("timeStamp", TimeStamp.getTodayTimeStamp())
-                .greaterThan("timeStamp", TimeStamp.getYesterdayTimeStamp())
+                .lessThan("timeStamp", TimeStamp.getTimeStamp())
+                .greaterThan("timeStamp", TimeStamp.getOneHourAgoTimeStamp())
                 .findAll();
+
+
 
         /*
         for(int i = 0; i < query.size(); i++){
             query.get(i).getTimeStamp();
         }
         */
+        Log.i("hari getWiFi", String.valueOf(query.size()));
 
         JSONArray jsonArray = new JSONArray();
         for(int i = 0; i < query.size(); i++){
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("BSSID", query.get(i).getBSSID());
-            jsonObject.put("SSID", query.get(i).getSSID());
+            jsonObject.put("bssid", query.get(i).getBSSID());
+            jsonObject.put("ssid", query.get(i).getSSID());
             jsonObject.put("level", query.get(i).getLevel());
-            jsonObject.put("time_stamp",query.get(i).getTimeStamp());
+            jsonObject.put("timestamp",query.get(i).getTimeStamp());
             jsonArray.put(jsonObject);
         }
 

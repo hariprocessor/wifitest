@@ -10,10 +10,21 @@
     tools:context="com.nunuplanet.test.MainActivity"
     android:orientation="vertical">
     <Button
-        android:id="@+id/send_button"
+        android:id="@+id/send_gps_button"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:text="SEND"/>
+        android:text="SEND GPS"/>
+    <Button
+        android:id="@+id/send_wifi_button"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="SEND WIFI"/>
+    <Button
+        android:id="@+id/send_step_button"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="SEND STEP"/>
+
     <ListView
         android:id="@+id/wifi_list_view"
         android:layout_width="match_parent"

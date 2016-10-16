@@ -50,10 +50,11 @@ public class StepsTools {
     public static JSONArray getSteps() throws JSONException {
         Realm realm = Realm.getDefaultInstance();
         RealmResults<Steps> query = realm.where(Steps.class)
-                .lessThan("timeStamp", TimeStamp.getTodayTimeStamp())
-                .greaterThan("timeStamp", TimeStamp.getYesterdayTimeStamp())
+                .lessThan("timeStamp", TimeStamp.getTimeStamp())
+                .greaterThan("timeStamp", TimeStamp.getOneHourAgoTimeStamp())
                 .findAll();
-
+        Log.i("hari getSteps", String.valueOf(query.size()));
+        Log.i("hari timestamp", String.valueOf(TimeStamp.getOneHourAgoTimeStamp()));
         /*
         for(int i = 0; i < query.size(); i++){
             query.get(i).getTimeStamp();
@@ -63,8 +64,8 @@ public class StepsTools {
         JSONArray jsonArray = new JSONArray();
         for(int i = 0; i < query.size(); i++){
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("steps", query.get(i).getStep());
-            jsonObject.put("time_stamp",query.get(i).getTimeStamp());
+            jsonObject.put("step", query.get(i).getStep());
+            jsonObject.put("timestamp",query.get(i).getTimeStamp());
             jsonArray.put(jsonObject);
         }
 

@@ -2,6 +2,8 @@ package com.nunuplanet.test;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +15,7 @@ import android.net.Uri;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 
@@ -27,14 +30,18 @@ import android.widget.Toast;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.nunuplanet.test.communication.SendData;
 import com.nunuplanet.test.communication.SendGPS;
+import com.nunuplanet.test.database.GPS;
 import com.nunuplanet.test.database.Steps;
+import com.nunuplanet.test.database.WiFiList;
 import com.nunuplanet.test.database.WiFiTools;
 import com.nunuplanet.test.wifi.WiFiData;
 import com.nunuplanet.test.wifi.WifiListAdapter;
 
 import org.json.JSONException;
 
+import java.sql.Time;
 import java.util.List;
 
 import io.realm.Realm;
@@ -43,7 +50,7 @@ import io.realm.RealmResults;
 
 
 public class MainActivity extends AppCompatActivity {
-    public final static String URL = "http://localhost:8080/gpstest";
+    public final static String URL = "http://166.104.231.227:8080/gpstest";
 
 
     private ScanResult scanResult;
@@ -53,7 +60,9 @@ public class MainActivity extends AppCompatActivity {
     private WifiListAdapter wifiListAdapter = new WifiListAdapter();
     private ListView wifiListView;
 
-    private Button sendButton;
+    private Button sendGpsButton;
+    private Button sendWifiButton;
+    private Button sendStepButton;
 
     private SensorManager sensorManager;
     private Sensor sensor;
@@ -89,16 +98,39 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Count sensor not available!", Toast.LENGTH_SHORT).show();
         }
 */
-        sendButton = (Button) findViewById(R.id.send_button);
-        sendButton.setOnClickListener(new View.OnClickListener() {
+        sendGpsButton = (Button) findViewById(R.id.send_gps_button);
+        sendWifiButton = (Button) findViewById(R.id.send_wifi_button);
+        sendStepButton = (Button) findViewById(R.id.send_step_button);
+        sendGpsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try {
-                    new SendGPS(getApplicationContext()).sendGPS();
+                    new SendData(getApplicationContext()).sendGPS();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+            }
+        });
 
+        sendWifiButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    new SendData(getApplicationContext()).sendWifi();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        sendStepButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    new SendData(getApplicationContext()).sendStep();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -117,10 +149,15 @@ public class MainActivity extends AppCompatActivity {
         Realm realm = Realm.getInstance(realmConfiguration);
 
         // test
-        RealmResults<Steps> query = realm.where(Steps.class).findAll();
+        RealmResults<WiFiList> query = realm.where(WiFiList.class).findAll();
+        Log.i("hari size wifi", String.valueOf(query.size()));
+        RealmResults<GPS> query2 = realm.where(GPS.class).findAll();
+        Log.i("hari size gps", String.valueOf(query2.size()));
+        /*
         for(int i = 0; i < query.size(); i++){
-            Log.i("hari", String.valueOf(query.get(i).getStep())+", "+String.valueOf(query.get(i).getTimeStamp()));
+            Log.i("hari", String.valueOf(query.get(i).getBSSID())+", "+String.valueOf(query.get(i).getTimeStamp()));
         }
+        */
 /*
         // activate gps
         GetGPS getGPS = new GetGPS(this);
@@ -137,9 +174,21 @@ public class MainActivity extends AppCompatActivity {
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
 
-        Intent intent = new Intent(MainActivity.this, MyService.class);
+        Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
         startService(intent);
+
+        Intent alarmIntent = new Intent(MainActivity.this, AlarmReceiver.class);
+        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, alarmIntent, 0);
+
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        int interval = 1000*60*60;
+
+        manager.setInexactRepeating(AlarmManager.RTC_WAKEUP, TimeStamp.getTriggerTimeStamp(), interval, pendingIntent);
+        Toast.makeText(this, "Alarm Set", Toast.LENGTH_SHORT).show();
+
     }
+
+    private PendingIntent pendingIntent;
 
     public static boolean hasPermissions(Context context, String... permissions) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
