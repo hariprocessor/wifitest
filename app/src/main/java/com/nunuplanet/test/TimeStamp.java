@@ -14,8 +14,6 @@ public class TimeStamp {
 
     public static long getTriggerTimeStamp(){
         Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY)+1);
-        calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         return calendar.getTimeInMillis();
@@ -42,7 +40,7 @@ public class TimeStamp {
 
     public static long getOneHourAgoTimeStamp(){
         Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY)-1);
+        calendar.set(Calendar.SECOND, calendar.get(Calendar.SECOND)-20);
         return calendar.getTimeInMillis()/1000;
     }
 

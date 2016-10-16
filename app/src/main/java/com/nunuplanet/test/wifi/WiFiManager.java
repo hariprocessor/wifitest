@@ -32,7 +32,7 @@ public class WiFiManager {
         wifiManager.startScan();
         intentFilter = new IntentFilter();
         intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-        context.registerReceiver(wifiReceiver, intentFilter);
+        context.getApplicationContext().registerReceiver(wifiReceiver, intentFilter);
         //Log.i("hari ", "scan");
     }
 

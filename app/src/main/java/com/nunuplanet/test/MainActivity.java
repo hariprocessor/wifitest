@@ -173,16 +173,18 @@ public class MainActivity extends AppCompatActivity {
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
-
+/*
         Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
         startService(intent);
-
+*/
         Intent alarmIntent = new Intent(MainActivity.this, AlarmReceiver.class);
         pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, alarmIntent, 0);
 
-        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        int interval = 1000*60*60;
 
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        int interval = 1000*20;
+        Log.i("hari timestamp", String.valueOf(TimeStamp.getTriggerTimeStamp()));
+        Log.i("hari timestamp2", String.valueOf(System.currentTimeMillis()));
         manager.setInexactRepeating(AlarmManager.RTC_WAKEUP, TimeStamp.getTriggerTimeStamp(), interval, pendingIntent);
         Toast.makeText(this, "Alarm Set", Toast.LENGTH_SHORT).show();
 
