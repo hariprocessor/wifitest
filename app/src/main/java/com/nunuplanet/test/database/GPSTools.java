@@ -1,5 +1,7 @@
 package com.nunuplanet.test.database;
 
+import android.util.Log;
+
 import com.nunuplanet.test.TimeStamp;
 
 
@@ -39,9 +41,11 @@ public class GPSTools {
     public static JSONArray getGPS() throws JSONException {
         Realm realm = Realm.getDefaultInstance();
         RealmResults<GPS> query = realm.where(GPS.class)
-                .lessThan("timeStamp", TimeStamp.getTodayTimeStamp())
-                .greaterThan("timeStamp", TimeStamp.getYesterdayTimeStamp())
+                .lessThan("timeStamp", TimeStamp.getTimeStamp())
+                .greaterThan("timeStamp", TimeStamp.getOneHourAgoTimeStamp())
                 .findAll();
+
+        Log.i("hari getGPS", String.valueOf(query.size()));
 
         /*
         for(int i = 0; i < query.size(); i++){
@@ -54,7 +58,7 @@ public class GPSTools {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("latitude", query.get(i).getLatitude());
             jsonObject.put("longitude", query.get(i).getLongitude());
-            jsonObject.put("time_stamp",query.get(i).getTimeStamp());
+            jsonObject.put("timestamp",query.get(i).getTimeStamp());
             jsonArray.put(jsonObject);
         }
 

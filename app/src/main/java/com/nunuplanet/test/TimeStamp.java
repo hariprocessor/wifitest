@@ -10,6 +10,16 @@ import java.util.Calendar;
 public class TimeStamp {
     public static long getTimeStamp(){
         return System.currentTimeMillis()/1000;
+<<<<<<< HEAD
+=======
+    }
+
+    public static long getTriggerTimeStamp(){
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTimeInMillis();
+>>>>>>> 97dd009f5202fdf43850fa95643f8c1c4bf147aa
     }
 
     public static long getTodayTimeStamp(){
@@ -31,4 +41,12 @@ public class TimeStamp {
         calendar.add(Calendar.DAY_OF_YEAR, -1);
         return calendar.getTimeInMillis()/1000;
     }
+
+    public static long getOneHourAgoTimeStamp(){
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.SECOND, calendar.get(Calendar.SECOND)-20);
+        return calendar.getTimeInMillis()/1000;
+    }
+
+
 }

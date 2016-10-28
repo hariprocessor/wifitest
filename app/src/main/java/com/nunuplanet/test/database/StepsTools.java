@@ -17,7 +17,7 @@ import io.realm.RealmResults;
 public class StepsTools {
     public static void saveSteps(final long timestamp){
         Realm realm = Realm.getDefaultInstance();
-        final long _timestamp = timestamp - timestamp%5;
+        final long _timestamp = timestamp - timestamp%10;
         final RealmResults<Steps> query = realm.where(Steps.class).equalTo("timeStamp", _timestamp).findAll();
         //Log.i("hari", String.valueOf(_timestamp) + ", " + String.valueOf(query.size()));
 
@@ -38,6 +38,7 @@ public class StepsTools {
                 @Override
                 public void execute(Realm realm) {
                     query.get(0).setStep(query.get(0).getStep()+1);
+                    Log.i("hari", String.valueOf(query.get(0).getStep()));
                     realm.copyToRealmOrUpdate(query.get(0));
                 }
             });
@@ -46,9 +47,14 @@ public class StepsTools {
             realm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
+<<<<<<< HEAD
                     //Steps steps = realm.createObject(Steps.class);
                     Steps steps = new Steps();
                     steps.setTimeStamp(_timestamp);
+=======
+                    Steps steps = realm.createObject(Steps.class, _timestamp);
+                    //steps.setTimeStamp(_timestamp);
+>>>>>>> 97dd009f5202fdf43850fa95643f8c1c4bf147aa
                     steps.setStep(1);
                     realm.copyToRealmOrUpdate(steps);
                 }
@@ -64,10 +70,11 @@ public class StepsTools {
     public static JSONArray getSteps() throws JSONException {
         Realm realm = Realm.getDefaultInstance();
         RealmResults<Steps> query = realm.where(Steps.class)
-                .lessThan("timeStamp", TimeStamp.getTodayTimeStamp())
-                .greaterThan("timeStamp", TimeStamp.getYesterdayTimeStamp())
+                .lessThan("timeStamp", TimeStamp.getTimeStamp())
+                .greaterThan("timeStamp", TimeStamp.getOneHourAgoTimeStamp())
                 .findAll();
-
+        Log.i("hari getSteps", String.valueOf(query.size()));
+        Log.i("hari timestamp", String.valueOf(TimeStamp.getOneHourAgoTimeStamp()));
         /*
         for(int i = 0; i < query.size(); i++){
             query.get(i).getTimeStamp();
@@ -77,8 +84,8 @@ public class StepsTools {
         JSONArray jsonArray = new JSONArray();
         for(int i = 0; i < query.size(); i++){
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("steps", query.get(i).getStep());
-            jsonObject.put("time_stamp",query.get(i).getTimeStamp());
+            jsonObject.put("step", query.get(i).getStep());
+            jsonObject.put("timestamp",query.get(i).getTimeStamp());
             jsonArray.put(jsonObject);
         }
 
